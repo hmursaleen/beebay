@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Profile</h1>
+    <h2>Username : {{ user.username }}</h2>
+    <p>First Name: {{ user.first_name }}</p>
+    <p>Last Name: {{ user.last_name }}</p>
+    <!--<p>Email: {{ user.email }}</p> -->
+    <p>Joining Date: {{ user.date_joined }}</p>
+    
+    <h3>Description</h3>
+    <p>{{ user.Profile.description }}</p>
+
+    <!--
+    <h3>Blogs</h3>
+    {% if blogs %}
+        <ul>
+        {% for blog in blogs %}
+            <li>
+                <h4>{{ blog.posted_at }}</h4>
+                <p>{{ blog.content }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No blogs available.</p>
+    {% endif %}
+    -->
+    {% if request.user == user %}
+        <a href="{% url 'edit_profile' %}">Edit Profile</a>
+    {% endif %}
+{% endblock %}

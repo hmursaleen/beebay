@@ -1,11 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages, auth
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import authenticate, login as auth_login, get_user_model
 from django.template import loader
-from .models import Blog
+from .models import Blog, Comment, Profile
 from django.conf import settings
 
 
@@ -85,3 +85,61 @@ def create_blog(request):
         return redirect('dashboard')
     
     return render(request, 'dashboard.html')
+
+
+@login_required
+def like_blog(request, blog_id):
+    blog = get_object_or_404(Blog, id=blog_id)
+    if request.user in blog.likes.all():
+        blog.likes.remove(request.user)
+    else:
+        blog.likes.add(request.user)
+    likes_count = blog.likes.count()
+    return JsonResponse({'likes_count': likes_count})
+
+
+@login_required
+def add_comment(request, blog_id):
+    if request.method == 'POST':
+        content = request.POST['content']
+        blog = get_object_or_404(Blog, id=blog_id)
+        comment = Comment(user=request.user, content=content, blog=blog)
+        comment.save()
+    return redirect('dashboard')
+
+
+@login_required
+def profile(request):
+    user = request.user
+    blogs = Blog.objects.filter(user=user).order_by('-posted_at')
+    context = {
+        'user': user,
+        #'blogs': blogs,
+    }
+    return render(request, 'profile.html', context)
+
+
+
+User = get_user_model()
+@login_required
+def edit_profile(request):
+    user = request.user
+    # Check if the user has a profile
+    if not hasattr(user, 'Profile'):
+        # Create a profile for the user
+        Profile.objects.create(user=user)
+
+    # Access the profile associated with the user
+    profile = user.Profile
+
+    if request.method == 'POST':
+        description = request.POST['description']
+        profile.description = description
+        profile.save()
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('profile')
+
+    context = {
+        'user': user,
+    }
+    return render(request, 'edit_profile.html', context)

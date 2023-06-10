@@ -19,11 +19,36 @@
             <h3>{{ blog.user.username }}</h3>
             <p> {{ blog.posted_at }} </p>
             <p>{{ blog.content }}</p>
+            <button onclick="likeBlog({{ blog.id }})">Like</button>
+            <p>Likes: <span id="likes_count_{{ blog.id }}">{{ blog.likes.count }}</span></p>
             {% if blog.image %}
                 <img src="{{ MEDIA_URL }}{{ blog.image.url }}" alt="Blog Image">
             {% endif %}
+            <h4>Comments:</h4>
+            {% for comment in blog.comments.all %}
+                <p>{{ comment.user.username }}: {{ comment.content }}</p>
+            {% empty %}
+                <p>No comments available.</p>
+            {% endfor %}
+            <form method="POST" action="{% url 'add_comment' blog.id %}">
+                {% csrf_token %}
+                <textarea name="content" placeholder="Write a comment"></textarea>
+                <br>
+                <button type="submit">Add Comment</button>
+            </form>
         </div>
     {% empty %}
         <p>No blogs available.</p>
     {% endfor %}
+
+    <script>
+        function likeBlog(blogId) {
+            fetch('/like/' + blogId)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('likes_count_' + blogId).textContent = data.likes_count;
+                })
+                .catch(error => console.log(error));
+        }
+    </script>
 {% endblock %}
