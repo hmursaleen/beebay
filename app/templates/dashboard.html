@@ -1,10 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>Welcome to the Dashboard</h1>
-    <p>You are logged in!</p>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Welcome, {{ user.username }}!</h1>
+    
+    <h2>Create a Blog</h2>
+    <form method="POST" action="{% url 'create_blog' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <textarea name="content" placeholder="Write your blog here"></textarea>
+        <br>
+        <input type="file" name="image">
+        <br>
+        <button type="submit">Publish!</button>
+    </form>
+    
+    <h2>All Blogs</h2>
+    {% for blog in blogs %}
+        <div>
+            <h3>{{ blog.user.username }}</h3>
+            <p> {{ blog.posted_at }} </p>
+            <p>{{ blog.content }}</p>
+            {% if blog.image %}
+                <img src="{{ MEDIA_URL }}{{ blog.image.url }}" alt="Blog Image">
+            {% endif %}
+        </div>
+    {% empty %}
+        <p>No blogs available.</p>
+    {% endfor %}
+{% endblock %}
