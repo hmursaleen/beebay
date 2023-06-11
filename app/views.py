@@ -154,7 +154,15 @@ def send_message(request, username):
 
     return redirect('message_thread', username=username)
 
-
+@login_required
+def search_users(request):
+    search_query = request.GET.get('search_query', '')
+    users = User.objects.filter(username__icontains=search_query)
+    context = {
+        'search_query': search_query,
+        'users': users
+    }
+    return render(request, 'search_users.html', context)
 
 '''
 User = get_user_model()
