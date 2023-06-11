@@ -109,17 +109,27 @@ def add_comment(request, blog_id):
 
 
 @login_required
-def profile(request):
-    user = request.user
-    blogs = Blog.objects.filter(user=user).order_by('-posted_at')
-    context = {
-        'user': user,
-        #'blogs': blogs,
-    }
-    return render(request, 'profile.html', context)
+def profile(request, username):
+    user = User.objects.get(username=username)
+    # Add any additional logic or data retrieval for the profile detail page
+    return render(request, 'profile.html', {'user': user})
 
 
 
+
+@login_required
+def send_message(request, username):
+    if request.method == 'POST':
+        message = request.POST['message']
+        # Get the user to whom the message is being sent
+        recipient = get_object_or_404(User, username=username)
+        # Save the message to your desired model or send it through a messaging service
+        # Here, we'll just display a success message
+        messages.success(request, f"Message sent to {recipient.username} successfully!")
+        return redirect('profile_detail', username=username)
+
+
+'''
 User = get_user_model()
 @login_required
 def edit_profile(request):
@@ -143,3 +153,5 @@ def edit_profile(request):
         'user': user,
     }
     return render(request, 'edit_profile.html', context)
+
+'''

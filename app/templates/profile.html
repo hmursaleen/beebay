@@ -11,22 +11,10 @@
     <h3>Description</h3>
     <p>{{ user.Profile.description }}</p>
 
-    <!--
-    <h3>Blogs</h3>
-    {% if blogs %}
-        <ul>
-        {% for blog in blogs %}
-            <li>
-                <h4>{{ blog.posted_at }}</h4>
-                <p>{{ blog.content }}</p>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No blogs available.</p>
-    {% endif %}
-    -->
-    {% if request.user == user %}
-        <a href="{% url 'edit_profile' %}">Edit Profile</a>
-    {% endif %}
+    <form method="POST" action="{% url 'send_message' username=user.username %}">
+        {% csrf_token %}
+        <textarea name="message" placeholder="Write your message here"></textarea>
+        <br>
+        <button type="submit">Send Message</button>
+    </form>
 {% endblock %}
