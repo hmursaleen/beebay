@@ -2,18 +2,28 @@
 
 {% block content %}
     <h1>Profile</h1>
-    <h2>Username : {{ user.username }}</h2>
+    <h2>Username: {{ user.username }}</h2>
     <p>First Name: {{ user.first_name }}</p>
     <p>Last Name: {{ user.last_name }}</p>
-    <!--<p>Email: {{ user.email }}</p> -->
     <p>Joining Date: {{ user.date_joined }}</p>
-    
+
     <h3>Description</h3>
-    <p>{{ user.Profile.description }}</p>
+    <p>{{ user.profile.description }}</p>
+
+    <h3>Conversations</h3>
+    {% for conversation in conversations %}
+        {% with conversation.sender as sender %}
+            {% if sender.username %}
+                <h4><a href="{% url 'message_thread' username=sender.username %}">{% if conversation.is_read %}{{ sender.username }}{% else %}<strong>{{ sender.username }}</strong>{% endif %}</a></h4>
+            {% endif %}
+        {% endwith %}
+    {% empty %}
+        <p>No conversations available.</p>
+    {% endfor %}
 
     <form method="POST" action="{% url 'send_message' username=user.username %}">
         {% csrf_token %}
-        <textarea name="message" placeholder="Write your message here"></textarea>
+        <textarea name="content" placeholder="Write your message here"></textarea>
         <br>
         <button type="submit">Send Message</button>
     </form>

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Message Thread</h1>
+    <h2>Conversation with {{ sender.username }}</h2>
+
+    {% for message in messages %}
+        {% if message.sender == sender %}
+            <p><strong>{{ sender.username }}:</strong> {{ message.content }}</p>
+        {% else %}
+            <p>{{ sender.username }}: {{ message.content }}</p>
+        {% endif %}
+    {% empty %}
+        <p>No messages available.</p>
+    {% endfor %}
+
+    <form method="POST" action="{% url 'send_message' username=sender.username %}">
+        {% csrf_token %}
+        <textarea name="content" placeholder="Write your message here"></textarea>
+        <br>
+        <button type="submit">Send Message</button>
+    </form>
+{% endblock %}

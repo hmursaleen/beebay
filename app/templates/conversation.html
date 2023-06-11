@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Conversation with {{ sender.username }}</h1>
+
+    {% for message in messages %}
+        <div>
+            <p>{% if message.is_read %}{{ message.sender.username }}{% else %}<strong>{{ message.sender.username }}</strong>{% endif %}: {{ message.content }}</p>
+            <p>Received at: {{ message.timestamp }}</p>
+        </div>
+    {% empty %}
+        <p>No messages available.</p>
+    {% endfor %}
+
+    <form method="POST" action="{% url 'send_message' sender.username %}">
+        {% csrf_token %}
+        <textarea name="content" placeholder="Type your message here"></textarea>
+        <input type="submit" value="Send">
+    </form>
+{% endblock %}

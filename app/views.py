@@ -5,8 +5,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as auth_login, get_user_model
 from django.template import loader
-from .models import Blog, Comment, Profile
+from .models import Blog, Comment, Profile, Message
 from django.conf import settings
+from django.utils import timezone
+from django.db.models import Q
 
 
 def signup(request):
@@ -112,21 +114,46 @@ def add_comment(request, blog_id):
 def profile(request, username):
     user = User.objects.get(username=username)
     # Add any additional logic or data retrieval for the profile detail page
-    return render(request, 'profile.html', {'user': user})
+    conversations = Message.objects.filter(recipient=user).values('sender').distinct()
+    context = {
+        'user': user,
+        'conversations': conversations,
+    }
+    return render(request, 'profile.html', context)
 
 
+@login_required
+def message_thread(request, username):
+    # Retrieve the sender and recipient
+    sender = get_object_or_404(User, username=username)
+    recipient = request.user
+
+    # Retrieve the messages exchanged between sender and recipient
+    messages = Message.objects.filter((Q(sender=sender, recipient=recipient) | Q(sender=recipient, recipient=sender))).order_by('timestamp')
+
+    context = {
+        'sender': sender,
+        'messages': messages,
+    }
+    return render(request, 'message_thread.html', context)
 
 
 @login_required
 def send_message(request, username):
+    sender = request.user
+    recipient = get_object_or_404(User, username=username)
+
     if request.method == 'POST':
-        message = request.POST['message']
-        # Get the user to whom the message is being sent
-        recipient = get_object_or_404(User, username=username)
-        # Save the message to your desired model or send it through a messaging service
-        # Here, we'll just display a success message
-        messages.success(request, f"Message sent to {recipient.username} successfully!")
-        return redirect('profile_detail', username=username)
+        content = request.POST.get('content', '')
+        if content.strip() != '':
+            message = Message.objects.create(sender=sender, recipient=recipient, content=content)
+            message.save()
+            messages.success(request, 'Message sent successfully.')
+        else:
+            messages.error(request, 'Message content cannot be empty.')
+
+    return redirect('message_thread', username=username)
+
 
 
 '''

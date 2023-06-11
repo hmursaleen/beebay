@@ -10,5 +10,5 @@ urlpatterns = [
     path('add_comment/<int:blog_id>/', views.add_comment, name='add_comment'),
     path('profile/<str:username>/', views.profile, name='profile'),
     path('send_message/<str:username>/', views.send_message, name='send_message'),
-    #path('edit_profile/', views.edit_profile, name='edit_profile'),
+    path('message_thread/<str:username>/', views.message_thread, name='message_thread'),
 ]
